@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Panel</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .settings-container {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+            margin-right: 10px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--error-color);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .json-preview {
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .settings-container {
+                padding: 1.5rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .dark-mode {
+            --bg-color: #111827;
+            --card-bg: #1f2937;
+            --text-color: #f3f4f6;
+            --border-color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification"></div>
+    <div class="container">
+        <div class="header">
+            <h1>Settings Configuration</h1>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+        </div>
+        <div class="settings-container">
+            <div class="form-group">
+                <label for="mistralApiKey">MISTRAL AI API KEY</label>
+                <input type="text" class="form-control" id="mistralApiKey" placeholder="Enter Mistral API Key">
+            </div>
+            <div class="form-group">
+                <label for="jarvisApiKey">JARVIS API KEY</label>
+                <input type="text" class="form-control" id="jarvisApiKey" placeholder="Enter Jarvis API Key">
+            </div>
+            <div class="form-group">
+                <label for="chatApiKey">CHAT API KEY</label>
+                <input type="text" class="form-control" id="chatApiKey" placeholder="Enter Chat API Key">
+            </div>
+            <div class="form-group">
+                <label for="mistralAgentId">MISTRAL AGENT ID</label>
+                <input type="text" class="form-control" id="mistralAgentId" placeholder="Enter Mistral Agent ID">
+            </div>
+            <div class="form-group">
+                <div class="toggle-container">
+                    <label class="toggle">
+                        <input type="checkbox" id="customEmail">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>CUSTOM EMAIL</span>
+                </div>
+            </div>
+            <div class="form-group" id="customEmailUrlGroup" style="display: none;">
+                <label for="customUserEmailUrl">CUSTOM USER EMAIL URL</label>
+                <input type="text" class="form-control" id="customUserEmailUrl" placeholder="Enter Custom User Email URL">
+            </div>
+            <div class="form-group">
+                <label for="userName">USER NAME</label>
+                <input type="text" class="form-control" id="userName" placeholder="Enter User Name">
+            </div>
+            
+            <h3>Preview</h3>
+            <div class="json-preview" id="jsonPreview"></div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                <button class="btn btn-primary" id="saveBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default settings
+        const defaultSettings = {
+            "MISTRAL_AI_API_KEY": "Null",
+            "Jarvis_API_KEY": "Null",
+            "Chat_API_KEY": "hello",
+            "MISTRAL_AGENT_ID": "Null",
+            "Custom_User_Email_URL": "Null",
+            "USER_NAME": "Doctor",
+            "CUSTOM_Email": "false"
+        };
+
+        // DOM elements
+        const mistralApiKeyInput = document.getElementById('mistralApiKey');
+        const jarvisApiKeyInput = document.getElementById('jarvisApiKey');
+        const chatApiKeyInput = document.getElementById('chatApiKey');
+        const mistralAgentIdInput = document.getElementById('mistralAgentId');
+        const customUserEmailUrlInput = document.getElementById('customUserEmailUrl');
+        const userNameInput = document.getElementById('userName');
+        const customEmailToggle = document.getElementById('customEmail');
+        const jsonPreview = document.getElementById('jsonPreview');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const notification = document.getElementById('notification');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Initialize settings
+        let currentSettings = { ...defaultSettings };
+
+        // Load settings from localStorage if available
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('settings');
+            if (savedSettings) {
+                try {
+                    currentSettings = JSON.parse(savedSettings);
+                } catch (error) {
+                    showNotification('Error loading settings', 'error');
+                    currentSettings = { ...defaultSettings };
+                }
+            }
+            updateFormFields();
+            updateJsonPreview();
+        }
+
+        // Update form fields with current settings
+        function updateFormFields() {
+            mistralApiKeyInput.value = currentSettings.MISTRAL_AI_API_KEY === "Null" ? "" : currentSettings.MISTRAL_AI_API_KEY;
+            jarvisApiKeyInput.value = currentSettings.Jarvis_API_KEY === "Null" ? "" : currentSettings.Jarvis_API_KEY;
+            chatApiKeyInput.value = currentSettings.Chat_API_KEY === "Null" ? "" : currentSettings.Chat_API_KEY;
+            mistralAgentIdInput.value = currentSettings.MISTRAL_AGENT_ID === "Null" ? "" : currentSettings.MISTRAL_AGENT_ID;
+            customUserEmailUrlInput.value = currentSettings.Custom_User_Email_URL === "Null" ? "" : currentSettings.Custom_User_Email_URL;
+            userNameInput.value = currentSettings.USER_NAME;
+            customEmailToggle.checked = currentSettings.CUSTOM_Email === "true";
+            toggleCustomEmailUrlVisibility();
+        }
+
+        // Update JSON preview
+        function updateJsonPreview() {
+            jsonPreview.textContent = JSON.stringify(currentSettings, null, 4);
+        }
+
+        // Save settings
+        function saveSettings() {
+            // Update current settings from form fields
+            currentSettings.MISTRAL_AI_API_KEY = mistralApiKeyInput.value.trim() || "Null";
+            currentSettings.Jarvis_API_KEY = jarvisApiKeyInput.value.trim() || "Null";
+            currentSettings.Chat_API_KEY = chatApiKeyInput.value.trim() || "Null";
+            currentSettings.MISTRAL_AGENT_ID = mistralAgentIdInput.value.trim() || "Null";
+            currentSettings.Custom_User_Email_URL = customUserEmailUrlInput.value.trim() || "Null";
+            currentSettings.USER_NAME = userNameInput.value.trim() || "Doctor";
+            currentSettings.CUSTOM_Email = customEmailToggle.checked ? "true" : "false";
+
+            // Save to localStorage
+            localStorage.setItem('settings', JSON.stringify(currentSettings));
+
+            // Create and download settings.json file
+            const jsonString = JSON.stringify(currentSettings, null, 4);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'settings.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            updateJsonPreview();
+            showNotification('Settings saved successfully!', 'success');
+        }
+
+        // Reset settings to default
+        function resetSettings() {
+            currentSettings = { ...defaultSettings };
+            updateFormFields();
+            updateJsonPreview();
+            showNotification('Settings reset to default', 'success');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Toggle dark/light theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.textContent = '☀️';
+            } else {
+                themeToggle.textContent = '🌙';
+            }
+        }
+
+        // Toggle Custom Email URL visibility
+        function toggleCustomEmailUrlVisibility() {
+            const customEmailUrlGroup = document.getElementById('customEmailUrlGroup');
+            customEmailUrlGroup.style.display = customEmailToggle.checked ? 'block' : 'none';
+        }
+
+        // Event listeners
+        saveBtn.addEventListener('click', saveSettings);
+        resetBtn.addEventListener('click', resetSettings);
+        themeToggle.addEventListener('click', toggleTheme);
+        customEmailToggle.addEventListener('change', toggleCustomEmailUrlVisibility);
+
+        // Real-time JSON preview updates
+        const formInputs = [mistralApiKeyInput, jarvisApiKeyInput, chatApiKeyInput, mistralAgentIdInput, customUserEmailUrlInput, userNameInput];
+        formInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const tempSettings = { ...currentSettings };
+                tempSettings.MISTRAL_AI_API_KEY = mistralApiKeyInput.value.trim() || "Null";
+                tempSettings.Jarvis_API_KEY = jarvisApiKeyInput.value.trim() || "Null";
+                tempSettings.Chat_API_KEY = chatApiKeyInput.value.trim() || "Null";
+                tempSettings.MISTRAL_AGENT_ID = mistralAgentIdInput.value.trim() || "Null";
+                tempSettings.Custom_User_Email_URL = customUserEmailUrlInput.value.trim() || "Null";
+                tempSettings.USER_NAME = userNameInput.value.trim() || "Doctor";
+                jsonPreview.textContent = JSON.stringify(tempSettings, null, 4);
+            });
+        });
+
+        customEmailToggle.addEventListener('change', () => {
+            const tempSettings = { ...currentSettings };
+            tempSettings.CUSTOM_Email = customEmailToggle.checked ? "true" : "false";
+            jsonPreview.textContent = JSON.stringify(tempSettings, null, 4);
+            toggleCustomEmailUrlVisibility();
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>
